@@ -1,0 +1,36 @@
+name: autoservice_trio
+description: "Курсовой проект: Приложение Автосервис Трио"
+
+# Запрет на публикацию в репозитории
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # Иконки для iOS стиля (нужны Flutter по дефолту)
+  cupertino_icons: ^1.0.6
+  
+  # Для работы с форматами дат (в истории и записях)
+  intl: ^0.19.0
+  http: ^1.2.2
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  
+  # Стандартные правила оформления кода
+  flutter_lints: ^3.0.0
+
+flutter:
+  # Использование иконок Material Design
+  uses-material-design: true
+
+  # Если в будущем добавишь картинки, раскомментируй это:
+  # assets:
+  #   - assets/
