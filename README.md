@@ -1,82 +1,117 @@
 # AutoService Trio
 
-Информационная система автосервиса, разработанная в рамках дипломного проекта.  
-Проект состоит из клиентской части на Flutter, серверной части на FastAPI и базы данных PostgreSQL.
+Информационная система автосервиса (дипломный проект): клиентское приложение на Flutter, REST API на FastAPI, база PostgreSQL.
+
+## Возможности
+
+- **Клиент:** регистрация, вход, личный гараж, запись на услуги, история заявок, личный кабинет
+- **Механик:** вход, просмотр всех заявок с email клиента и датой, смена статуса (Ожидание → В работе → Готово)
+- **Изоляция данных:** у каждого клиента свой гараж и свои заявки; механик видит заявки всех клиентов
 
 ## Технологический стек
 
-- `Flutter` (Dart) — клиентское приложение
-- `FastAPI` + `SQLAlchemy` — серверное API
-- `PostgreSQL` — хранение данных
-- `Docker Compose` — оркестрация инфраструктуры
+| Слой | Технологии |
+|------|------------|
+| Клиент | Flutter (Dart), `http`, `shared_preferences` |
+| Сервер | FastAPI, SQLAlchemy, passlib (bcrypt), python-jose (JWT) |
+| БД | PostgreSQL 15 |
+| Инфраструктура | Docker Compose |
 
-## Структура проекта
+## Структура репозитория
 
-- `lib/` — исходный код Flutter-приложения
-- `backend/` — серверное приложение FastAPI
-- `scripts/` — служебные скрипты проверки
-- `docker-compose.yml` — конфигурация запуска контейнеров
+```
+autoservice_app/
+├── lib/main.dart          # Flutter-приложение (UI + API-клиент)
+├── backend/
+│   ├── main.py            # REST API, маршруты
+│   ├── models.py          # SQLAlchemy-модели
+│   ├── schemas.py         # Pydantic-схемы
+│   ├── auth.py            # JWT, хеш паролей, зависимости
+│   ├── database.py        # Подключение к PostgreSQL
+│   ├── Dockerfile
+│   └── requirements.txt
+├── web/                   # Flutter Web (index.html, html-рендерер)
+├── scripts/
+│   └── smoke_test_api.py  # Проверка API
+├── docker-compose.yml
+├── .env.example
+└── README.md
+```
 
-## Запуск проекта
+## Быстрый старт
 
-Рабочая директория:
+### 1. Подготовка
 
 ```bash
 cd D:\Project\Projects\autoservice_app
+copy .env.example .env
 ```
 
-### 1. Запуск базы данных и API
+### 2. База данных и API
 
 ```bash
 docker compose up -d --build
 ```
 
-Проверка доступности API:
+Проверка: http://localhost:8000/health → `{"status":"ok",...}`
 
-```bash
-http://localhost:8000/health
-```
+Документация API: http://localhost:8000/docs
 
-### 2. Запуск клиентского приложения (Web)
+### 3. Flutter (Web)
 
 ```bash
 flutter pub get
-flutter run -d chrome
+flutter run -d chrome --web-renderer html
 ```
 
-После запуска Flutter откройте URL, выведенный в консоли (обычно `http://localhost:53xxx`).
+> **Web:** обязательно `--web-renderer html`, иначе при блокировке `gstatic.com` возможен белый экран.
 
-### 3. Остановка контейнеров
-
-```bash
-docker compose down
-```
-
-## Переменные окружения
-
-Параметры подключения к PostgreSQL задаются в файле `.env`.
-
-Пример:
-
-```env
-POSTGRES_USER=user_trio
-POSTGRES_PASSWORD=password_trio
-POSTGRES_DB=autoservice_db
-```
-
-Шаблон файла: `.env.example`.
-
-## Smoke-тест API
-
-Для быстрой проверки работоспособности серверной части выполните:
+### 4. Smoke-тест
 
 ```bash
 py scripts/smoke_test_api.py
 ```
 
-Скрипт проверяет:
+Ожидается: `SMOKE TEST OK`
 
-- доступность endpoint `health`
-- создание записи автомобиля
-- создание заявки на обслуживание
-- корректность чтения данных через `/cars` и `/bookings`
+## Учётные записи
+
+| Роль | Email | Пароль |
+|------|-------|--------|
+| Механик (тест) | `mechanic@trio.ru` | `mechanic123` |
+| Клиент | регистрация в приложении | свой пароль |
+
+Механик создаётся автоматически при первом запуске API.
+
+## API (кратко)
+
+| Метод | Путь | Кто | Описание |
+|-------|------|-----|----------|
+| POST | `/register` | все | Регистрация клиента → JWT |
+| POST | `/login` | все | Вход → JWT |
+| GET | `/services` | все | Список услуг |
+| GET/POST/PUT/DELETE | `/cars` | клиент | Гараж (только свои) |
+| GET/POST | `/bookings` | клиент / механик* | Заявки (*механик — все, клиент — свои) |
+| PATCH | `/bookings/{id}/status` | механик | Смена статуса |
+
+Защищённые запросы: заголовок `Authorization: Bearer <token>`.
+
+## Переменные окружения
+
+См. `.env.example`: PostgreSQL, `MECHANIC_EMAIL`, `MECHANIC_PASSWORD`, `JWT_SECRET`.
+
+## Остановка
+
+```bash
+docker compose down
+```
+
+## Известные нюансы
+
+1. **Flutter Web** — рендерер `html`, не CanvasKit (сеть/Google Fonts).
+2. **После обновления API** — перелогиниться в приложении (нужен новый JWT).
+3. **Механик видит заявки** только если клиенты их создали.
+
+## Лицензия
+
+Учебный проект. См. репозиторий на GitHub.

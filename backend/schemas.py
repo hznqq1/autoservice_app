@@ -1,5 +1,30 @@
 from datetime import datetime
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, EmailStr, Field
+
+
+class UserRegister(BaseModel):
+    email: EmailStr
+    password: str = Field(min_length=6, max_length=128)
+
+
+class UserLogin(BaseModel):
+    email: EmailStr
+    password: str = Field(min_length=1, max_length=128)
+
+
+class UserOut(BaseModel):
+    id: int
+    email: str
+    role: str
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class AuthUserOut(BaseModel):
+    id: int
+    email: str
+    role: str
+    access_token: str
 
 
 class ServiceOut(BaseModel):
@@ -54,3 +79,5 @@ class BookingOut(BaseModel):
     status: str
     date: str
     created_at: datetime
+    client_email: str = ""
+    client_id: int | None = None

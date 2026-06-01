@@ -3,3 +3,7 @@ uvicorn[standard]
 sqlalchemy
 psycopg2-binary
 pydantic
+email-validator
+passlib[bcrypt]
+bcrypt>=4.0.1,<5.0
+python-jose[cryptography]
