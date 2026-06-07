@@ -42,9 +42,11 @@ autoservice_app/
 
 ### 1. Подготовка
 
+Перейдите в корневую директорию проекта и создайте локальный файл с переменными окружения:
+
 ```bash
-cd D:\Project\Projects\autoservice_app
-copy .env.example .env
+cd autoservice_app
+cp .env.example .env
 ```
 
 ### 2. База данных и API
@@ -111,7 +113,3 @@ docker compose down
 1. **Flutter Web** — рендерер `html`, не CanvasKit (сеть/Google Fonts).
 2. **После обновления API** — перелогиниться в приложении (нужен новый JWT).
 3. **Механик видит заявки** только если клиенты их создали.
-
-## Лицензия
-
-Учебный проект. См. репозиторий на GitHub.
